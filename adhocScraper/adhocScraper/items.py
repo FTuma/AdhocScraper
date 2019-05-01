@@ -5,19 +5,19 @@
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/items.html
 
-import scrapy
 from scrapy.item import Item, Field
-
 from scrapy.loader.processors import Join, MapCompose, TakeFirst, Compose, Identity
-from w3lib.html import remove_tags
+from w3lib.html import remove_tags, replace_entities, replace_escape_chars
 import re
 
 
-class AdhocNewsItem(scrapy.Item):
-    url = Field()
+class AdhocNewsItem(Item):
+    newsID = Field(output_processor=TakeFirst())
+    companyID = Field(output_processor=TakeFirst())
+    url = Field(output_processor=TakeFirst())
 
     company_name = Field(
-        input_processor=MapCompose(remove_tags),
+        input_processor=MapCompose(remove_tags, replace_entities),
         output_processor=TakeFirst(),
     )
     wkn = Field(
@@ -37,10 +37,10 @@ class AdhocNewsItem(scrapy.Item):
         output_processor=TakeFirst(),
     )
     headline = Field(
-        input_processor=MapCompose(remove_tags),
+        input_processor=MapCompose(remove_tags, replace_entities),
         output_processor=Join(),
     )
     text = Field(
-        input_processor=MapCompose(remove_tags, lambda x: x.split()),
+        input_processor=MapCompose(remove_tags, replace_entities, lambda x: x.split()),
         output_processor=Join(),
     )

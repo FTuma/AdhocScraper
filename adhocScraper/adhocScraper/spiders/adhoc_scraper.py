@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
+import re
 import scrapy
 from scrapy.loader import ItemLoader
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors.lxmlhtml import LxmlLinkExtractor
 from adhocScraper.items import AdhocNewsItem
 from w3lib.html import remove_tags
-import re
-
+from datetime import datetime
 
 
 class AdhocScraperSpider(scrapy.Spider):
@@ -20,11 +20,12 @@ class AdhocScraperSpider(scrapy.Spider):
     XPATH_COMPANY_NAME = '//*[contains(concat( " ", @class, " " ), concat( " ", "company_header", " " ))]//*[contains(concat( " ", @class, " " ), concat( " ", "darkblue", " " ))]'
     XPATH_COMPANY_WKN_ISIN_COUNTRY = '//*[@id="content"]/div[1]/div[1]/ul/li'  # '//*[contains(concat( " ", @class, " " ), concat( " ", "company_header", " " ))]//ul'
 
-    XPATH_COMPANY_DATETIME = '/html/body/div[2]/div[2]/div[1]/div[2]/div/h2'
+    XPATH_COMPANY_DATETIME = '//*[contains(concat( " ", @class, " " ), concat( " ", "news_content", " " ))]//*[contains(concat( " ", @class, " " ), concat( " ", "darkblue", " " ))]'
     XPATH_COMPANY_HEADLINE = '//*[@id="content"]/div[1]/div[2]/div/div/h1'
     XPATH_COMPANY_MAINTEXT = '//*[contains(concat( " ", @class, " " ), concat( " ", "news_main", " " ))]'
     XPATH_COMPANY_MAINTEXT_PRE = '//pre'
-    XPATH_COMPANY_MAINTEXT_OTHER = '//*[contains(concat( " ", @class, " " ), concat( " ", "break-word", " " ))]'
+    XPATH_COMPANY_MAINTEXT_BREAKWORDS = '//*[contains(concat( " ", @class, " " ), concat( " ", "break-word", " " ))]'
+    XPATH_COMPANY_MAINTEXT_X = ''
     RE_DATETIME = r'.+ (\d\d\.\d\d\.\d\d\d\d \| \d\d:\d\d)'
 
     def __init__(self, url='https://dgap.de/dgap/News/?newsType=ADHOC&page=1&limit=20', *args, **kwargs):
@@ -66,6 +67,9 @@ class AdhocScraperSpider(scrapy.Spider):
         print(response.url)
         # TODO Extract and store company & news ID from page URL
         l = ItemLoader(item=AdhocNewsItem(), response=response)
+        l.add_value('newsID', re.search(r'.*newsID=(\d+)', response.url).group(1))
+        l.add_value('companyID', re.search(r'.*companyID=(\d+)', response.url).group(1))
+
         l.add_value('url', response.url)
         l.add_xpath('company_name', self.XPATH_COMPANY_NAME)
 
@@ -78,9 +82,12 @@ class AdhocScraperSpider(scrapy.Spider):
             l.add_value('wkn', '')
             l.add_value('isin', re.search(r'ISIN: (.+)', company_meta[0]).group(1))
             l.add_value('country', re.search(r'Land: (.+)', company_meta[1]).group(1))
-        l.add_value('timestamp', response.xpath(self.XPATH_COMPANY_DATETIME).re_first(self.RE_DATETIME, default=''))
+
+        ts_string = response.xpath(self.XPATH_COMPANY_DATETIME).re_first(self.RE_DATETIME, default='',)
+        l.add_value('timestamp', datetime.strptime(ts_string, "%d.%m.%Y | %H:%M"))
         l.add_xpath('headline', self.XPATH_COMPANY_HEADLINE)
         l.add_xpath('text', self.XPATH_COMPANY_MAINTEXT)
         l.add_xpath('text', self.XPATH_COMPANY_MAINTEXT_PRE)
+        l.add_xpath('text', self.XPATH_COMPANY_MAINTEXT_BREAKWORDS)
 
         return l.load_item()
