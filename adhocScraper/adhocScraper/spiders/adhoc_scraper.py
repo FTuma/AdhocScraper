@@ -24,8 +24,8 @@ class AdhocScraperSpider(scrapy.Spider):
     XPATH_COMPANY_HEADLINE = '//*[@id="content"]/div[1]/div[2]/div/div/h1'
     XPATH_COMPANY_MAINTEXT = '//*[contains(concat( " ", @class, " " ), concat( " ", "news_main", " " ))]'
     XPATH_COMPANY_MAINTEXT_PRE = '//pre'
+    XPATH_COMPANY_MAINTEXT_OTHER = '//*[contains(concat( " ", @class, " " ), concat( " ", "break-word", " " ))]'
     RE_DATETIME = r'.+ (\d\d\.\d\d\.\d\d\d\d \| \d\d:\d\d)'
-
 
     def __init__(self, url='https://dgap.de/dgap/News/?newsType=ADHOC&page=1&limit=20', *args, **kwargs):
         # Don't forget to call parent constructor
@@ -64,7 +64,7 @@ class AdhocScraperSpider(scrapy.Spider):
     def parse_adhoc_page(self, response):
         # Print what the spider is doing
         print(response.url)
-
+        # TODO Extract and store company & news ID from page URL
         l = ItemLoader(item=AdhocNewsItem(), response=response)
         l.add_value('url', response.url)
         l.add_xpath('company_name', self.XPATH_COMPANY_NAME)
@@ -78,30 +78,9 @@ class AdhocScraperSpider(scrapy.Spider):
             l.add_value('wkn', '')
             l.add_value('isin', re.search(r'ISIN: (.+)', company_meta[0]).group(1))
             l.add_value('country', re.search(r'Land: (.+)', company_meta[1]).group(1))
-        l.add_value('timestamp', response.xpath(self.XPATH_COMPANY_DATETIME).re(self.RE_DATETIME))
+        l.add_value('timestamp', response.xpath(self.XPATH_COMPANY_DATETIME).re_first(self.RE_DATETIME, default=''))
         l.add_xpath('headline', self.XPATH_COMPANY_HEADLINE)
         l.add_xpath('text', self.XPATH_COMPANY_MAINTEXT)
         l.add_xpath('text', self.XPATH_COMPANY_MAINTEXT_PRE)
 
-
         return l.load_item()
-
-    # rules = (
-    #     # Extract link from this path only
-    #     Rule(
-    #         LxmlLinkExtractor(restrict_xpaths=[
-    #             "//ol[@id=repo-list]//h3/a/@href"], allow_domains=['https://github.com/trending']),
-    #         callback='parse'
-    #     ),
-    #     # link should match this pattern and create new requests
-    #     Rule(
-    #         LxmlLinkExtractor(allow='https://github.com/[\w-]+/[\w-]+$', allow_domains=['github.com']),
-    #         callback='parse_product_page'
-    #     ),
-    # )
-
-
-XPATH_COMPANY_META = '//*[contains(concat( " ", @class, " " ), concat( " ", "darkblue", " " ))] | //*[(@id = "content")]//ul'
-XPATH_COMPANY_WKN = '//*[contains(concat( " ", @class, " " ), concat( " ", "company_header", " " ))]//li[(((count(preceding-sibling::*) + 1) = 1) and parent::*)]'
-XPATH_COMPANY_ISIN = '//*[contains(concat( " ", @class, " " ), concat( " ", "company_header", " " ))]//li[(((count(preceding-sibling::*) + 1) = 2) and parent::*)]'
-XPATH_COMPANY_COUNTRY = '//*[contains(concat( " ", @class, " " ), concat( " ", "company_header", " " ))]//li[(((count(preceding-sibling::*) + 1) = 3) and parent::*)]'
