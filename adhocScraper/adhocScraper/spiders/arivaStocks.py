@@ -3,6 +3,7 @@ import scrapy
 from scrapy.loader import ItemLoader
 from adhocScraper.items import ArivaStockItem
 from datetime import datetime
+from scrapy.utils.project import get_project_settings
 
 ALL_STOCKS_ISIN = ['DE000A0WMNK9',
                    'DE0005403901',
@@ -1002,14 +1003,13 @@ ALL_STOCKS_ISIN = ['DE000A0WMNK9',
                    'DE0005085708',
                    'DE0006617400',
                    'DE000A0NK3W4',
-                   'DE0006628100']
+                   'DE0006628100']  # TODO: Import ISIN list from file
 
 
 class ArivaStocksSpider(scrapy.Spider):
     name = 'arivaStocks'
     allowed_domains = ['ariva.de']
     start_url = 'https://www.ariva.de/'
-    # handle_httpstatus_list = [301, 302]
 
     REL_URL_METADATA = '/bilanz-guv#stammdaten'
     REL_URL_HISTORICALDATA = '/historische_kurse'
@@ -1037,19 +1037,16 @@ class ArivaStocksSpider(scrapy.Spider):
             yield request
 
     def parse(self, response):
-        # Print what the spider is doing
         link = ''.join([response.url, self.REL_URL_METADATA])
         request = response.follow(link, callback=self.parse_stock_metadata)
         self.logger.info('Parse: Got successful response from {}\nNow navigating to {}'.format(response.url, link))
         request.meta['main_url'] = response.url
-        request.meta['isin'] = response.meta['isin']  # response.request.url.rsplit(r'/', 1)[-1]  # TODO: doesn't work
+        request.meta['isin'] = response.meta['isin']
 
         yield request
 
     def parse_stock_metadata(self, response):
-        # Print what the spider is doing
-        print(response.url)
-
+        # Extract & store metadata
         l = ItemLoader(item=ArivaStockItem(), response=response)
         l.add_value('security_name', response.meta['main_url'].rsplit(r'/', 1)[-1])
         l.add_value('isin', response.meta['isin'])
@@ -1070,14 +1067,12 @@ class ArivaStocksSpider(scrapy.Spider):
         yield request
 
     def parse_stock_prices(self, response):
-        # Print what the spider is doing
-        print(response.url)
+        # TODO: make start_date an argument/settings config
         item = response.meta['item']
         secuid = response.xpath(self.XPATH_SECURITYID).attrib['value']
-        print('secuid', secuid)
         item.add_value('arivaID', secuid)
         exchangeid = response.xpath(self.XPATH_EXCHANGEID).attrib['value']
-
+        # TODO: Add option to download always from XETRA (exchangeID=6)
         item.add_value('exchangeID', exchangeid)
         start_date = '2000-01-01'
         end_date = datetime.today().strftime('%Y-%m-%d')
