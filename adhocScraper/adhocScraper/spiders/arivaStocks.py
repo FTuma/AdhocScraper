@@ -1025,13 +1025,16 @@ class ArivaStocksSpider(scrapy.Spider):
 
     BASE_URL_HISTORIC_PRICES = r'http://www.ariva.de/quote/historic/historic.csv'
 
-    # TODO: Replace __init__ with start_requests method and yield ISIN as request meta data
-    def __init__(self, stock_isins=ALL_STOCKS_ISIN, *args, **kwargs):
-        # Don't forget to call parent constructor
-        super(ArivaStocksSpider, self).__init__(*args, **kwargs)
-        # Set the start_urls to be the one given in url parameters
+    def start_requests(self):
+        """If spider is started with option -a stock_isins=['ISIN1','ISIN2',...] it will scrape these ISINs"""
+        stock_isins = getattr(self, 'stock_isins', None)
+        if stock_isins is None:
+            stock_isins = ALL_STOCKS_ISIN
+        requests = [scrapy.Request(url=''.join([self.start_url, isin]), meta={'isin': isin}, callback=self.parse) for
+                    isin in stock_isins]
 
-        self.start_urls = [''.join([self.start_url, isin]) for isin in stock_isins]
+        for request in requests:
+            yield request
 
     def parse(self, response):
         # Print what the spider is doing
@@ -1039,7 +1042,7 @@ class ArivaStocksSpider(scrapy.Spider):
         request = response.follow(link, callback=self.parse_stock_metadata)
         self.logger.info('Parse: Got successful response from {}\nNow navigating to {}'.format(response.url, link))
         request.meta['main_url'] = response.url
-        request.meta['isin'] = response.request.url.rsplit(r'/', 1)[-1]  # TODO: doesn't work
+        request.meta['isin'] = response.meta['isin']  # response.request.url.rsplit(r'/', 1)[-1]  # TODO: doesn't work
 
         yield request
 
