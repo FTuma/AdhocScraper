@@ -64,10 +64,12 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
+ITEM_PIPELINES = {
+    'scrapy.pipelines.files.FilesPipeline': 1
 #    'adhocScraper.pipelines.AdhocscraperPipeline': 300,
-#}
-
+}
+FILES_STORE = '/home/felix/PycharmProjects/AdhocScraper/adhocScraper/data/stocks'  #or: file:///tmp/export.csv
+MEDIA_ALLOW_REDIRECTS = True
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
