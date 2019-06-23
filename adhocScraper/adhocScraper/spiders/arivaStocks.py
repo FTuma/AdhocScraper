@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import scrapy
-from scrapy.loader import ItemLoader
-from adhocScraper.items import ArivaStockItem
 from datetime import datetime
-from scrapy.utils.project import get_project_settings
+
+import scrapy
+from adhocScraper.items import ArivaStockItem
+from scrapy.loader import ItemLoader
 
 ALL_STOCKS_ISIN = ['DE000A0WMNK9',
                    'DE0005403901',
@@ -1048,7 +1048,7 @@ class ArivaStocksSpider(scrapy.Spider):
     def parse_stock_metadata(self, response):
         # Extract & store metadata
         l = ItemLoader(item=ArivaStockItem(), response=response)
-        l.add_value('security_name', response.meta['main_url'].rsplit(r'/', 1)[-1])
+        l.add_value('security_name', response.meta['main_url'].rsplit(r'/', 1)[-1].encode('utf-8'))
         l.add_value('isin', response.meta['isin'])
         l.add_css('foundingyear', self.CSS_PATH_META_FOUNDINGYEAR)
         l.add_css('ticker', self.CSS_PATH_META_TICKER)
