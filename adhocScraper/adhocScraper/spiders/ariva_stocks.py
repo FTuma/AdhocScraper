@@ -1013,13 +1013,13 @@ class ArivaStocksSpider(scrapy.Spider):
 
     REL_URL_METADATA = '/bilanz-guv#stammdaten'
     REL_URL_HISTORICALDATA = '/historische_kurse'
-    CSS_PATH_META_FOUNDINGYEAR = ".stammdaten tr:nth-child(1) td"
-    CSS_PATH_META_TICKER = ".stammdaten tr:nth-child(2) td"
-    CSS_PATH_META_LISTINGDATE = ".stammdaten tr:nth-child(3) td"
-    CSS_PATH_META_COUNTRY = ".stammdaten tr:nth-child(5) td"
-    CSS_PATH_META_INDUSTRY = ".stammdaten tr:nth-child(7) td"
-    CSS_PATH_META_STOCKTYPE = ".stammdaten tr:nth-child(8) td"
-    CSS_PATH_META_SECTOR = ".stammdaten tr:nth-child(9) td"
+    CSS_PATH_META_FOUNDINGYEAR = '.stammdaten tr:nth-child(1) td'
+    CSS_PATH_META_TICKER = '.stammdaten tr:nth-child(2) td'
+    CSS_PATH_META_LISTINGDATE = '.stammdaten tr:nth-child(3) td'
+    CSS_PATH_META_COUNTRY = '.stammdaten tr:nth-child(5) td'
+    CSS_PATH_META_INDUSTRY = '.stammdaten tr:nth-child(7) td'
+    CSS_PATH_META_STOCKTYPE = '.stammdaten tr:nth-child(8) td'
+    CSS_PATH_META_SECTOR = '.stammdaten tr:nth-child(9) td'
     XPATH_SECURITYID = '//input[@name="secu"]'
     XPATH_EXCHANGEID = '//input[@name="boerse_id"]'
 
