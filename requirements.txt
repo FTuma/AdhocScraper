@@ -1,3 +1,4 @@
 BeautifulSoup4
 Scrapy
 w3lib
+arctic
