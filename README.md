@@ -21,3 +21,9 @@ along with the some data about the publishing companies like the name, ISIN & WK
 This spider downloads the price history for the stocks given by their ISIN,
 as well as company metadata like the company sector & industry, country and more if available.
 
+## Usage
+
+Adhoc-announcements:  
+`scrapy crawl adhocScraper -o adhoc.csv`  
+Stocks:  
+`scrapy crawl arivaStocks -o adhoc_stocks_metadata.csv`
