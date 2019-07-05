@@ -4,6 +4,7 @@ from datetime import datetime
 
 import scrapy
 from adhocScraper.items import AdhocNewsItem
+from scrapy.exceptions import CloseSpider
 from scrapy.loader import ItemLoader
 from w3lib.html import remove_tags
 
@@ -28,22 +29,27 @@ class AdhocScraperSpider(scrapy.Spider):
     XPATH_COMPANY_MAINTEXT_X = ''
     RE_DATETIME = r'.+ (\d\d\.\d\d\.\d\d\d\d \| \d\d:\d\d)'
 
-    # TODO: Stop at last stored newsID & cleanup
+    # TODO: Read last newsID from DB or file
 
-    def __init__(self, url='https://dgap.de/dgap/News/?newsType=ADHOC&page=1&limit=20', *args, **kwargs):
+    def __init__(self, url='https://dgap.de/dgap/News/?newsType=ADHOC&page=1&limit=20', last_newsid=0, *args, **kwargs):
         super(AdhocScraperSpider, self).__init__(*args, **kwargs)
         # Set the start_urls to be the one given in url parameters
         self.start_urls = [url]
+        self.last_newsid = last_newsid
 
     def parse(self, response):
         href_selectors = response.xpath(self.XPATH_SYMBOLS_ENG)
+        current_newsids = []
         for selector in href_selectors:
             link = selector.xpath('@href').extract()[0] if 'newsID' in selector.xpath('@href').extract()[0] else False
             if link:
+                current_newsids.append(int(re.search(r'.*newsID=(\d+)', link).group(1)))
                 request = response.follow(link, callback=self.parse_adhoc_page)
                 yield request
             else:
                 continue
+        if all([newsid < self.last_newsid for newsid in current_newsids]):
+            raise CloseSpider('Scraped all new announcements until provided newsID, stopping adhoc spider...')
         if response.url != self.start_urls[0]:
             next_page_selector = response.xpath(self.XPATH_NEXT_PAGE)
         else:
