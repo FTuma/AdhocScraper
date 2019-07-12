@@ -24,7 +24,7 @@ from scrapy.contrib.pipeline.images import FilesPipeline
 #             self.ids_seen.add(item['id'])
 #             return item
 
-
+# TODO: Either create CSV pipeline to append to existing file for Adhoc announcements or DB to read from & append to
 class AdhocscraperPipeline(object):
     def process_item(self, item, spider):
         return item
