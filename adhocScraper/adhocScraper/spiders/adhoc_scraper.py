@@ -10,8 +10,10 @@ from w3lib.html import remove_tags
 
 
 class AdhocScraperSpider(scrapy.Spider):
-    name = 'adhoc_scraper'
+    name = 'adhocScraper'
     allowed_domains = ['dgap.de']
+    custom_settings = {'FEED_URI': 'adhoc.csv',
+                       'FEED_FORMAT': 'csv'}
 
     XPATH_SYMBOLS_ENG = '//a[(((count(preceding-sibling::*) + 1) = 4) and parent::*)]'
     XPATH_SECOND_PAGE = '//*[@id="content"]/div[1]/div/div[2]/a'
@@ -35,21 +37,27 @@ class AdhocScraperSpider(scrapy.Spider):
         super(AdhocScraperSpider, self).__init__(*args, **kwargs)
         # Set the start_urls to be the one given in url parameters
         self.start_urls = [url]
-        self.last_newsid = last_newsid
+        self.last_newsid = int(last_newsid)
 
     def parse(self, response):
         href_selectors = response.xpath(self.XPATH_SYMBOLS_ENG)
-        current_newsids = []
+        current_page_newsids = []
         for selector in href_selectors:
             link = selector.xpath('@href').extract()[0] if 'newsID' in selector.xpath('@href').extract()[0] else False
             if link:
-                current_newsids.append(int(re.search(r'.*newsID=(\d+)', link).group(1)))
-                request = response.follow(link, callback=self.parse_adhoc_page)
-                yield request
+                current_newsid = int(re.search(r'.*newsID=(\d+)', link).group(1))
+                current_page_newsids.append(current_newsid)
+                if current_newsid > self.last_newsid:
+
+                    request = response.follow(link, callback=self.parse_adhoc_page)
+                    yield request
+                else:
+                    continue
             else:
                 continue
-        if all([newsid < self.last_newsid for newsid in current_newsids]):
-            raise CloseSpider('Scraped all new announcements until provided newsID, stopping adhoc spider...')
+        if all([newsid < self.last_newsid for newsid in current_page_newsids]):
+            raise CloseSpider('Scraped all new announcements until provided newsID {},'
+                              ' stopping adhoc spider...'.format(self.last_newsid))
         if response.url != self.start_urls[0]:
             next_page_selector = response.xpath(self.XPATH_NEXT_PAGE)
         else:
