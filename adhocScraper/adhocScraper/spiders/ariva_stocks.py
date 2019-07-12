@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import scrapy
 from adhocScraper.items import ArivaStockItem
@@ -9,7 +9,10 @@ from scrapy.loader import ItemLoader
 class ArivaStocksSpider(scrapy.Spider):
     name = 'arivaStocks'
     allowed_domains = ['ariva.de']
+    custom_settings = {'FEED_URI': 'adhoc_stocks_metadata_latest.csv',
+                       'FEED_FORMAT': 'csv'}
     start_url = 'https://www.ariva.de/'
+
 
     REL_URL_METADATA = '/bilanz-guv#stammdaten'
     REL_URL_HISTORICALDATA = '/historische_kurse'
@@ -84,7 +87,7 @@ class ArivaStocksSpider(scrapy.Spider):
         # TODO: Add option to download always from XETRA (exchangeID=6)
         item.add_value('exchangeID', exchangeid)
         start_date = '2000-01-01'
-        end_date = datetime.today().strftime('%Y-%m-%d')
+        end_date = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
         stock_params_url = '?secu={}&boerse_id={}&clean_split=1&clean_payout=1&clean_bezug=1&min_time={}&max_time={}' \
                            '&trenner=%3B&go=Download' \
             .format(secuid, exchangeid, start_date, end_date)
