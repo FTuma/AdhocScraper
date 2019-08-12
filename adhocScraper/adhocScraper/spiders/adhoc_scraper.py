@@ -42,7 +42,7 @@ class AdhocScraperSpider(scrapy.Spider):
 
     def parse(self, response):
         current_page, last_page = response.xpath(self.XPATH_CURRENT_AND_LAST_PAGE).re(self.RE_CURRENT_AND_LAST_PAGE)
-        if current_page > last_page:
+        if int(current_page) > int(last_page):
             raise CloseSpider('Scraped all pages, stopping adhoc spider...')
         href_selectors = response.xpath(self.XPATH_SYMBOLS_ENG)
         current_page_newsids = []
