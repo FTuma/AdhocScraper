@@ -18,6 +18,7 @@ class AdhocScraperSpider(scrapy.Spider):
     XPATH_SYMBOLS_ENG = '//a[(((count(preceding-sibling::*) + 1) = 4) and parent::*)]'
     XPATH_SECOND_PAGE = '//*[@id="content"]/div[1]/div/div[2]/a'
     XPATH_NEXT_PAGE = '//*[@id="content"]/div[1]/div/div[2]/div[2]/a'
+    XPATH_CURRENT_AND_LAST_PAGE = '//*[contains(concat( " ", @class, " " ), concat( " ", "list_pages", " " ))]/text()'
 
     XPATH_COMPANY_NAME = '//*[contains(concat( " ", @class, " " ), concat( " ", "company_header", " " ))]\
     //*[contains(concat( " ", @class, " " ), concat( " ", "darkblue", " " ))]'
@@ -30,9 +31,8 @@ class AdhocScraperSpider(scrapy.Spider):
     XPATH_COMPANY_MAINTEXT_BREAKWORDS = '//*[contains(concat( " ", @class, " " ), concat( " ", "break-word", " " ))]'
     XPATH_COMPANY_MAINTEXT_X = ''
     RE_DATETIME = r'.+ (\d\d\.\d\d\.\d\d\d\d \| \d\d:\d\d)'
-
+    RE_CURRENT_AND_LAST_PAGE = r'(\d+) von (\d+)'
     # TODO: Read last newsID from DB or file and append only the new data
-    # TODO: Stop crawling at the last page
 
     def __init__(self, url='https://dgap.de/dgap/News/?newsType=ADHOC&page=1&limit=20', last_newsid=0, *args, **kwargs):
         super(AdhocScraperSpider, self).__init__(*args, **kwargs)
@@ -41,6 +41,9 @@ class AdhocScraperSpider(scrapy.Spider):
         self.last_newsid = int(last_newsid)
 
     def parse(self, response):
+        current_page, last_page = response.xpath(self.XPATH_CURRENT_AND_LAST_PAGE).re(self.RE_CURRENT_AND_LAST_PAGE)
+        if current_page > last_page:
+            raise CloseSpider('Scraped all pages, stopping adhoc spider...')
         href_selectors = response.xpath(self.XPATH_SYMBOLS_ENG)
         current_page_newsids = []
         for selector in href_selectors:
