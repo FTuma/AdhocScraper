@@ -9,11 +9,27 @@
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
+# Custom settings
 BOT_NAME = 'adhocScraper'
 
 SPIDER_MODULES = ['adhocScraper.spiders']
 NEWSPIDER_MODULE = 'adhocScraper.spiders'
 
+DATA_PATH = '/home/felix/PycharmProjects/AdhocScraper/adhocScraper/data/'
+
+ARIVA_METADATA_FILEPATH = '/home/felix/PycharmProjects/AdhocScraper/adhocScraper/data/adhoc_stocks_metadata.csv'
+ARIVA_METADATA_FILENAME = 'adhoc_stocks_metadata.csv'
+
+ADHOC_FILEPATH = '/home/felix/PycharmProjects/AdhocScraper/adhocScraper/data/adhoc.csv'
+ADHOC_FILENAME = 'adhoc.csv'
+# Settings for the download of the individual stock price data for each company
+FILES_STORE = '/home/felix/PycharmProjects/AdhocScraper/adhocScraper/data/stocks'
+MEDIA_ALLOW_REDIRECTS = True
+FILES_EXPIRES = 0
+# ArivaStocksSpider uses this list of ISIN to download stock price data if the parameter stock_isins isn't given
+PATH_ISIN_LIST = '/home/felix/PycharmProjects/AdhocScraper/adhocScraper/data/ALL_STOCKS_ISIN.txt'
+
+# Scrapy standard settings
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'adhocScraper (+http://www.yourdomain.com)'
@@ -61,16 +77,6 @@ ROBOTSTXT_OBEY = True
 #EXTENSIONS = {
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 #}
-
-# Configure item pipelines
-# See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    # 'scrapy.pipelines.files.FilesPipeline': 1
-    'adhocScraper.pipelines.ArivaFilePipeline': 300,
-}
-FILES_STORE = '/home/felix/PycharmProjects/AdhocScraper/adhocScraper/data/stocks'  #or: file:///tmp/export.csv
-MEDIA_ALLOW_REDIRECTS = True
-PATH_ISIN_LIST = '/home/felix/PycharmProjects/AdhocScraper/adhocScraper/data/ALL_STOCKS_ISIN.txt'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
