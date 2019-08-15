@@ -9,10 +9,13 @@ from scrapy.loader import ItemLoader
 class ArivaStocksSpider(scrapy.Spider):
     name = 'arivaStocks'
     allowed_domains = ['ariva.de']
-    custom_settings = {'FEED_URI': 'adhoc_stocks_metadata_latest.csv',
-                       'FEED_FORMAT': 'csv'}
+    custom_settings = {
+        'DOWNLOAD_DELAY': 3,  # Increase this number if you get blocked (Status code 429) and try again 24h later
+        'ITEM_PIPELINES': {'adhocScraper.pipelines.ArivaFilePipeline': 100,
+                           'adhocScraper.pipelines.ArivaCompanyMetaDataDuplicatesPipeline': 200,
+                           'adhocScraper.pipelines.ArivaCompanyMetadataCSVPipeline': 300}
+    }
     start_url = 'https://www.ariva.de/'
-
 
     REL_URL_METADATA = '/bilanz-guv#stammdaten'
     REL_URL_HISTORICALDATA = '/historische_kurse'
@@ -36,10 +39,11 @@ class ArivaStocksSpider(scrapy.Spider):
             try:
                 with open(path_stock_isins) as fname:
                     stock_isins = fname.readlines()
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 print(
-                    "Couldn't read list of stock ISINs to crawl from {}, specified under 'PATH_ISIN_LIST' in settings.py\nEither specify the list of isins as spider argument or store them as line-separated txt file.".format(
-                        path_stock_isins))
+                    "Couldn't read list of stock ISINs to crawl from {}, specified under 'PATH_ISIN_LIST' "
+                    "in settings.py\nEither specify the list of isins as spider argument "
+                    "or store them as line-separated txt file.".format(path_stock_isins))
 
         requests = [scrapy.Request(url=''.join([self.start_url, isin.strip()]), meta={'isin': isin.strip()},
                                    callback=self.parse) for
@@ -59,20 +63,20 @@ class ArivaStocksSpider(scrapy.Spider):
 
     def parse_stock_metadata(self, response):
         # Extract & store metadata
-        l = ItemLoader(item=ArivaStockItem(), response=response)
-        l.add_value('security_name', response.meta['main_url'].rsplit(r'/', 1)[-1].encode('utf-8'))
-        l.add_value('isin', response.meta['isin'])
-        l.add_css('foundingyear', self.CSS_PATH_META_FOUNDINGYEAR)
-        l.add_css('ticker', self.CSS_PATH_META_TICKER)
-        l.add_css('listingdate', self.CSS_PATH_META_LISTINGDATE)
-        l.add_css('country', self.CSS_PATH_META_COUNTRY)
-        l.add_css('industry', self.CSS_PATH_META_INDUSTRY)
-        l.add_css('stocktype', self.CSS_PATH_META_STOCKTYPE)
-        l.add_css('sector', self.CSS_PATH_META_SECTOR)
+        item = ItemLoader(item=ArivaStockItem(), response=response)
+        item.add_value('security_name', response.meta['main_url'].rsplit(r'/', 1)[-1].encode('utf-8'))
+        item.add_value('isin', response.meta['isin'])
+        item.add_css('foundingyear', self.CSS_PATH_META_FOUNDINGYEAR)
+        item.add_css('ticker', self.CSS_PATH_META_TICKER)
+        item.add_css('listingdate', self.CSS_PATH_META_LISTINGDATE)
+        item.add_css('country', self.CSS_PATH_META_COUNTRY)
+        item.add_css('industry', self.CSS_PATH_META_INDUSTRY)
+        item.add_css('stocktype', self.CSS_PATH_META_STOCKTYPE)
+        item.add_css('sector', self.CSS_PATH_META_SECTOR)
         link = ''.join([response.meta['main_url'], self.REL_URL_HISTORICALDATA])
 
         request = response.follow(link, callback=self.parse_stock_prices)
-        request.meta['item'] = l
+        request.meta['item'] = item
         self.logger.info('Parse stock_metadata: successful response from {}\nNow navigating to {}'.format(
             response.url, link))
 
