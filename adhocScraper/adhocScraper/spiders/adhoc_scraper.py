@@ -12,8 +12,10 @@ from w3lib.html import remove_tags
 class AdhocScraperSpider(scrapy.Spider):
     name = 'adhocScraper'
     allowed_domains = ['dgap.de']
-    custom_settings = {'FEED_URI': 'adhoc.csv',
-                       'FEED_FORMAT': 'csv'}
+    custom_settings = {
+                       'ITEM_PIPELINES': {'adhocScraper.pipelines.AdhocAnnouncementsDuplicatesPipeline': 100,
+                                          'adhocScraper.pipelines.AdhocAnnouncementsCSVPipeline': 200}
+                       }
 
     XPATH_SYMBOLS_ENG = '//a[(((count(preceding-sibling::*) + 1) = 4) and parent::*)]'
     XPATH_SECOND_PAGE = '//*[@id="content"]/div[1]/div/div[2]/a'
@@ -30,9 +32,9 @@ class AdhocScraperSpider(scrapy.Spider):
     XPATH_COMPANY_MAINTEXT_PRE = '//pre'
     XPATH_COMPANY_MAINTEXT_BREAKWORDS = '//*[contains(concat( " ", @class, " " ), concat( " ", "break-word", " " ))]'
     XPATH_COMPANY_MAINTEXT_X = ''
+
     RE_DATETIME = r'.+ (\d\d\.\d\d\.\d\d\d\d \| \d\d:\d\d)'
     RE_CURRENT_AND_LAST_PAGE = r'(\d+) von (\d+)'
-    # TODO: Read last newsID from DB or file and append only the new data
 
     def __init__(self, url='https://dgap.de/dgap/News/?newsType=ADHOC&page=1&limit=20', last_newsid=0, *args, **kwargs):
         super(AdhocScraperSpider, self).__init__(*args, **kwargs)
@@ -41,9 +43,7 @@ class AdhocScraperSpider(scrapy.Spider):
         self.last_newsid = int(last_newsid)
 
     def parse(self, response):
-        current_page, last_page = response.xpath(self.XPATH_CURRENT_AND_LAST_PAGE).re(self.RE_CURRENT_AND_LAST_PAGE)
-        if int(current_page) > int(last_page):
-            raise CloseSpider('Scraped all pages, stopping adhoc spider...')
+
         href_selectors = response.xpath(self.XPATH_SYMBOLS_ENG)
         current_page_newsids = []
         for selector in href_selectors:
@@ -64,6 +64,9 @@ class AdhocScraperSpider(scrapy.Spider):
                               ' stopping adhoc spider...'.format(current_page_newsids, self.last_newsid))
         if response.url != self.start_urls[0]:
             next_page_selector = response.xpath(self.XPATH_NEXT_PAGE)
+            current_page, last_page = response.xpath(self.XPATH_CURRENT_AND_LAST_PAGE).re(self.RE_CURRENT_AND_LAST_PAGE)
+            if int(current_page) > int(last_page):
+                raise CloseSpider('Scraped all pages, stopping adhoc spider...')
         else:
             next_page_selector = response.xpath(self.XPATH_SECOND_PAGE)
 
