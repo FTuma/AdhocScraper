@@ -7,8 +7,7 @@
 
 from scrapy.item import Item, Field
 from scrapy.loader.processors import Join, MapCompose, TakeFirst, Compose, Identity
-from w3lib.html import remove_tags, replace_entities, replace_escape_chars
-import re
+from w3lib.html import remove_tags, replace_entities
 
 
 class AdhocNewsItem(Item):
@@ -47,9 +46,9 @@ class AdhocNewsItem(Item):
 
 
 class ArivaStockItem(Item):
-    arivaID = Field(input_processor=Identity(), #MapCompose(lambda v: v.attrib['value']),
+    arivaID = Field(input_processor=Identity(),
                     output_processor=TakeFirst())
-    exchangeID = Field(input_processor=Identity(), #MapCompose(lambda v: v.attrib['value']),
+    exchangeID = Field(input_processor=Identity(),
                        output_processor=TakeFirst())
     security_name = Field(
         input_processor=MapCompose(remove_tags, replace_entities),
