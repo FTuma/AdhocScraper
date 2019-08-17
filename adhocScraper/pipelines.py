@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
 # Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 from os.path import isfile
 import scrapy
-from scrapy.contrib.pipeline.images import FilesPipeline
+from scrapy.pipelines.files import FilesPipeline
 from scrapy.exporters import CsvItemExporter
 from scrapy.exceptions import DropItem
 import pandas as pd
@@ -14,7 +11,7 @@ import pandas as pd
 
 class ArivaCompanyMetaDataDuplicatesPipeline(object):
 
-    def __init__(self, filepath, filename):
+    def __init__(self, filepath):
         try:
             self.file = pd.read_csv(filepath)
             self.ids_seen = set(self.file['isin'])
@@ -24,13 +21,12 @@ class ArivaCompanyMetaDataDuplicatesPipeline(object):
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            filepath=crawler.settings.get('ARIVA_METADATA_FILEPATH', ''),
-            filename=crawler.settings.get('ARIVA_METADATA_FILENAME', '')
+            filepath=crawler.settings.get('ARIVA_METADATA_FILEPATH')
         )
 
     def process_item(self, item, spider):
         if item['isin'] in self.ids_seen:
-            raise DropItem("Duplicate item found: %s" % item)
+            raise DropItem("Duplicate company metadata item found: %s" % item)
         else:
             self.ids_seen.add(item['isin'])
             return item
@@ -38,7 +34,7 @@ class ArivaCompanyMetaDataDuplicatesPipeline(object):
 
 class AdhocAnnouncementsDuplicatesPipeline(object):
 
-    def __init__(self, filepath, filename):
+    def __init__(self, filepath):
         try:
             self.file = pd.read_csv(filepath)
             self.ids_seen = set(self.file['newsID'])
@@ -48,21 +44,19 @@ class AdhocAnnouncementsDuplicatesPipeline(object):
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            filepath=crawler.settings.get('ADHOC_FILEPATH', ''),
-            filename=crawler.settings.get('ADHOC_FILENAME', '')
+            filepath=crawler.settings.get('ADHOC_FILEPATH')
         )
 
     def process_item(self, item, spider):
         if item['newsID'] in self.ids_seen:
-            raise DropItem("Duplicate item found: %s" % item)
+            raise DropItem("Duplicate announcement item found: %s" % item)
         else:
             self.ids_seen.add(item['newsID'])
             return item
 
 
 class CSVPipeline(object):
-    def __init__(self, filename, filepath):
-        self.filename = filename
+    def __init__(self, filepath):
         self.filepath = filepath
         self.file = None
         self.exporter = None
@@ -74,7 +68,6 @@ class CSVPipeline(object):
     def open_spider(self, spider):
         file_exists = isfile(self.filepath)
         self.file = open(self.filepath, 'ab')
-        # TODO: Add file paths with pathlib
         self.exporter = CsvItemExporter(self.file, include_headers_line=False if file_exists else True)
         self.exporter.start_exporting()
 
@@ -92,8 +85,7 @@ class AdhocAnnouncementsCSVPipeline(CSVPipeline):
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            filepath=crawler.settings.get('ADHOC_FILEPATH', ''),
-            filename=crawler.settings.get('ADHOC_FILENAME', '')
+            filepath=crawler.settings.get('ADHOC_FILEPATH')
         )
 
 
@@ -102,8 +94,7 @@ class ArivaCompanyMetadataCSVPipeline(CSVPipeline):
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            filepath=crawler.settings.get('ARIVA_METADATA_FILEPATH', ''),
-            filename=crawler.settings.get('ARIVA_METADATA_FILENAME', '')
+            filepath=crawler.settings.get('ARIVA_METADATA_FILEPATH')
         )
 
 
