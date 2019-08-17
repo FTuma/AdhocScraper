@@ -8,6 +8,8 @@
 #     https://doc.scrapy.org/en/latest/topics/settings.html
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
+from scrapy.utils.conf import closest_scrapy_cfg
+from pathlib import Path
 
 # Custom settings
 BOT_NAME = 'adhocScraper'
@@ -15,19 +17,25 @@ BOT_NAME = 'adhocScraper'
 SPIDER_MODULES = ['adhocScraper.spiders']
 NEWSPIDER_MODULE = 'adhocScraper.spiders'
 
-DATA_PATH = '/home/felix/PycharmProjects/AdhocScraper/data/'
+PROJECT_ROOT = Path(closest_scrapy_cfg()).parent
+DATA_DIR = PROJECT_ROOT / 'data'
+if not Path.is_dir(DATA_DIR):
+    Path.mkdir(DATA_DIR, exist_ok=True)
 
-ARIVA_METADATA_FILEPATH = '/home/felix/PycharmProjects/AdhocScraper/data/adhoc_stocks_metadata.csv'
 ARIVA_METADATA_FILENAME = 'adhoc_stocks_metadata.csv'
+ARIVA_METADATA_FILEPATH = DATA_DIR / ARIVA_METADATA_FILENAME
 
-ADHOC_FILEPATH = '/home/felix/PycharmProjects/AdhocScraper/data/adhoc.csv'
 ADHOC_FILENAME = 'adhoc.csv'
+ADHOC_FILEPATH = DATA_DIR / ADHOC_FILENAME
+
 # Settings for the download of the individual stock price data for each company
-FILES_STORE = '/home/felix/PycharmProjects/AdhocScraper/data/stocks'
+if not Path.is_dir(DATA_DIR / 'stocks'):
+    Path.mkdir(DATA_DIR / 'stocks', exist_ok=True)
+FILES_STORE = DATA_DIR / 'stocks'
 MEDIA_ALLOW_REDIRECTS = True
 FILES_EXPIRES = 0
 # ArivaStocksSpider uses this list of ISIN to download stock price data if the parameter stock_isins isn't given
-PATH_ISIN_LIST = '/home/felix/PycharmProjects/AdhocScraper/data/ALL_STOCKS_ISIN.txt'
+PATH_ISIN_LIST = DATA_DIR / 'ALL_STOCKS_ISIN.txt'
 
 # Scrapy standard settings
 
@@ -98,3 +106,5 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+
