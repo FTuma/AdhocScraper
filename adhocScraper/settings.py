@@ -31,7 +31,7 @@ ADHOC_FILEPATH = DATA_DIR / ADHOC_FILENAME
 # Settings for the download of the individual stock price data for each company
 if not Path.is_dir(DATA_DIR / 'stocks'):
     Path.mkdir(DATA_DIR / 'stocks', exist_ok=True)
-FILES_STORE = DATA_DIR / 'stocks'
+FILES_STORE = str(DATA_DIR / 'stocks')  # Convert to str because FilesPipeline can't handle Path objects
 MEDIA_ALLOW_REDIRECTS = True
 FILES_EXPIRES = 0
 # ArivaStocksSpider uses this list of ISIN to download stock price data if the parameter stock_isins isn't given
