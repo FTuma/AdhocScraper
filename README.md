@@ -60,9 +60,9 @@ timestamp, newsID, headline, text, isin, companyID, company_name, country, url, 
 
 arivaID, country, exchangeID, file_urls, files, foundingyear, industry, isin, listingdate, sector, security_name, stocktype, ticker
 
-**isin_XXXXXXX.csv**: delimited by semicolon & decimal comma
+**isin_XXXXXXX.csv**: German header & format - delimited by semicolon & decimal comma
 
-Datum (date), Eröffnung (open), Höchstkurs (high), Tiefstkurs (low), SSchlusskurs (close),Stücke (shares), VVolumen (volume) 
+Datum (date), Eröffnung (open), Höchstkurs (high), Tiefstkurs (low), Schlusskurs (close),Stücke (shares), Volumen (volume) 
 ## Conclusion
 After getting used to inner workings and all the possible extensions of Scrapy, you'll always want to do your web scraping with it. 
 
