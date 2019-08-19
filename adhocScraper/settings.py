@@ -29,9 +29,12 @@ ADHOC_FILENAME = 'adhoc.csv'
 ADHOC_FILEPATH = DATA_DIR / ADHOC_FILENAME
 
 # Settings for the download of the individual stock price data for each company
-if not Path.is_dir(DATA_DIR / 'stocks'):
-    Path.mkdir(DATA_DIR / 'stocks', exist_ok=True)
-FILES_STORE = str(DATA_DIR / 'stocks')  # Convert to str because FilesPipeline can't handle Path objects
+PRICES_START_DATE = '2000-01-01'
+ONLY_XETRA_PRICES = True
+STOCKS_DIR = 'stocks' if not ONLY_XETRA_PRICES else 'stocks_xetra'
+if not Path.is_dir(DATA_DIR / STOCKS_DIR):
+    Path.mkdir(DATA_DIR / STOCKS_DIR, exist_ok=True)
+FILES_STORE = str(DATA_DIR / STOCKS_DIR)  # Convert to str because FilesPipeline can't handle Path objectsbis
 MEDIA_ALLOW_REDIRECTS = True
 FILES_EXPIRES = 0
 # ArivaStocksSpider uses this list of ISIN to download stock price data if the parameter stock_isins isn't given

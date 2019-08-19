@@ -10,7 +10,7 @@ class ArivaStocksSpider(scrapy.Spider):
     name = 'arivaStocks'
     allowed_domains = ['ariva.de']
     custom_settings = {
-        'DOWNLOAD_DELAY': 3,  # Increase this number if you get blocked (Status code 429) and try again 24h later
+        'DOWNLOAD_DELAY': 1,  # Increase this number if you get blocked (Status code 429) and try again 24h later
         'ITEM_PIPELINES': {'adhocScraper.pipelines.ArivaFilePipeline': 100,
                            'adhocScraper.pipelines.ArivaCompanyMetaDataDuplicatesPipeline': 200,
                            'adhocScraper.pipelines.ArivaCompanyMetadataCSVPipeline': 300}
@@ -35,6 +35,7 @@ class ArivaStocksSpider(scrapy.Spider):
         """If spider is started with option -a stock_isins=['ISIN1','ISIN2',...] it will scrape these ISINs"""
         stock_isins = getattr(self, 'stock_isins', None)
         if stock_isins is None:
+            print('\nNo stock ISINs specified as parameter...\nReading in default ISIN list from settings.py...\n')
             path_stock_isins = self.settings.get('PATH_ISIN_LIST', '')
             try:
                 with open(path_stock_isins) as fname:
@@ -42,7 +43,7 @@ class ArivaStocksSpider(scrapy.Spider):
             except FileNotFoundError:
                 print(
                     "Couldn't read list of stock ISINs to crawl from {}, specified under 'PATH_ISIN_LIST' "
-                    "in settings.py\nEither specify the list of isins as spider argument "
+                    "in settings.py\nEither specify the list of ISINs as spider argument "
                     "or store them as line-separated txt file.".format(path_stock_isins))
 
         requests = [scrapy.Request(url=''.join([self.start_url, isin.strip()]), meta={'isin': isin.strip()},
@@ -83,14 +84,13 @@ class ArivaStocksSpider(scrapy.Spider):
         yield request
 
     def parse_stock_prices(self, response):
-        # TODO: make start_date an argument/settings config
         item = response.meta['item']
         secuid = response.xpath(self.XPATH_SECURITYID).attrib['value']
         item.add_value('arivaID', secuid)
-        exchangeid = response.xpath(self.XPATH_EXCHANGEID).attrib['value']
-        # TODO: Add option to download always from XETRA (exchangeID=6)
+        only_xetra_prices = self.settings.get('ONLY_XETRA_PRICES', False)
+        exchangeid = response.xpath(self.XPATH_EXCHANGEID).attrib['value'] if not only_xetra_prices else 6
         item.add_value('exchangeID', exchangeid)
-        start_date = '2000-01-01'
+        start_date = self.settings.get('PRICES_START_DATE', '2000-01-01')
         end_date = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
         stock_params_url = '?secu={}&boerse_id={}&clean_split=1&clean_payout=1&clean_bezug=1&min_time={}&max_time={}' \
                            '&trenner=%3B&go=Download' \
