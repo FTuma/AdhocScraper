@@ -34,7 +34,8 @@ ONLY_XETRA_PRICES = True
 STOCKS_DIR = 'stocks' if not ONLY_XETRA_PRICES else 'stocks_xetra'
 if not Path.is_dir(DATA_DIR / STOCKS_DIR):
     Path.mkdir(DATA_DIR / STOCKS_DIR, exist_ok=True)
-FILES_STORE = str(DATA_DIR / STOCKS_DIR)  # Convert to str because FilesPipeline can't handle Path objectsbis
+FILES_STORE = str(DATA_DIR / STOCKS_DIR)  # Convert to str because FilesPipeline can't handle Path objects
+STOCKS_FILES_PATH = DATA_DIR / STOCKS_DIR
 MEDIA_ALLOW_REDIRECTS = True
 FILES_EXPIRES = 0
 # ArivaStocksSpider uses this list of ISIN to download stock price data if the parameter stock_isins isn't given

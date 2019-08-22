@@ -2,6 +2,8 @@
 
 # Define your item pipelines here
 from os.path import isfile
+from pathlib import Path
+
 import scrapy
 from scrapy.pipelines.files import FilesPipeline
 from scrapy.exporters import CsvItemExporter
@@ -20,9 +22,7 @@ class ArivaCompanyMetaDataDuplicatesPipeline(object):
 
     @classmethod
     def from_crawler(cls, crawler):
-        return cls(
-            filepath=crawler.settings.get('ARIVA_METADATA_FILEPATH')
-        )
+        return cls(filepath=crawler.settings.get('ARIVA_METADATA_FILEPATH'))
 
     def process_item(self, item, spider):
         if item['isin'] in self.ids_seen:
@@ -43,9 +43,7 @@ class AdhocAnnouncementsDuplicatesPipeline(object):
 
     @classmethod
     def from_crawler(cls, crawler):
-        return cls(
-            filepath=crawler.settings.get('ADHOC_FILEPATH')
-        )
+        return cls(filepath=crawler.settings.get('ADHOC_FILEPATH'))
 
     def process_item(self, item, spider):
         if item['newsID'] in self.ids_seen:
@@ -84,18 +82,14 @@ class AdhocAnnouncementsCSVPipeline(CSVPipeline):
 
     @classmethod
     def from_crawler(cls, crawler):
-        return cls(
-            filepath=crawler.settings.get('ADHOC_FILEPATH')
-        )
+        return cls(filepath=crawler.settings.get('ADHOC_FILEPATH'))
 
 
 class ArivaCompanyMetadataCSVPipeline(CSVPipeline):
 
     @classmethod
     def from_crawler(cls, crawler):
-        return cls(
-            filepath=crawler.settings.get('ARIVA_METADATA_FILEPATH')
-        )
+        return cls(filepath=crawler.settings.get('ARIVA_METADATA_FILEPATH'))
 
 
 class ArivaFilePipeline(FilesPipeline):
@@ -106,3 +100,35 @@ class ArivaFilePipeline(FilesPipeline):
 
     def file_path(self, request, response=None, info=None):
         return 'isin_%s.csv' % request.meta.get('isin')
+
+
+class ArivaParquetFilePipeline(object):
+
+    def get_media_requests(self, item, info):
+        print('item-isin:', item['isin'])
+        return [scrapy.Request(x, meta={'isin': item['isin']}) for x in item.get('file_urls', [])]
+
+    def file_path(self, request, response=None, info=None):
+        return 'isin_%s.csv' % request.meta.get('isin')
+
+
+class ArivaStocksParquetPipeline(object):
+
+    def __init__(self, filepath):
+        self.filepath = filepath
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(filepath=crawler.settings.get('STOCKS_FILES_PATH'))
+
+    def process_item(self, item, spider):
+        try:
+            stock_data_df = pd.read_csv(filepath_or_buffer=item['file_urls'], delimiter=';', decimal=',',
+                                        usecols=['Datum', 'Erster', 'Hoch', 'Tief', 'Schlusskurs', 'Volumen'],
+                                        thousands='.', parse_dates=['Datum'], na_values={'Volumen': 0},
+                                        skipinitialspace=True).assign(ISIN=item['isin']).set_index(['Datum', 'ISIN'])
+        except Exception as e:
+            print(item['isin'], e)
+        stock_data_df.to_parquet(self.filepath / 'ISIN_{}.parquet'.format(item['isin']), engine='fastparquet',
+                                 compression='GZIP')
+        return item
