@@ -1,3 +1,4 @@
 Scrapy
 w3lib
 pandas
+fastparquet

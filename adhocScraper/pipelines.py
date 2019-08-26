@@ -123,12 +123,13 @@ class ArivaStocksParquetPipeline(object):
 
     def process_item(self, item, spider):
         try:
-            stock_data_df = pd.read_csv(filepath_or_buffer=item['file_urls'], delimiter=';', decimal=',',
+            stock_data_df = pd.read_csv(filepath_or_buffer=item['file_urls'][0], delimiter=';', decimal=',',
                                         usecols=['Datum', 'Erster', 'Hoch', 'Tief', 'Schlusskurs', 'Volumen'],
                                         thousands='.', parse_dates=['Datum'], na_values={'Volumen': 0},
                                         skipinitialspace=True).assign(ISIN=item['isin']).set_index(['Datum', 'ISIN'])
+            stock_data_df.to_parquet(self.filepath / 'ISIN_{}.parquet'.format(item['isin']), engine='fastparquet',
+                                     compression='GZIP')
         except Exception as e:
             print(item['isin'], e)
-        stock_data_df.to_parquet(self.filepath / 'ISIN_{}.parquet'.format(item['isin']), engine='fastparquet',
-                                 compression='GZIP')
+
         return item
