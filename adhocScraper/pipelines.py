@@ -102,16 +102,6 @@ class ArivaFilePipeline(FilesPipeline):
         return 'isin_%s.csv' % request.meta.get('isin')
 
 
-class ArivaParquetFilePipeline(object):
-
-    def get_media_requests(self, item, info):
-        print('item-isin:', item['isin'])
-        return [scrapy.Request(x, meta={'isin': item['isin']}) for x in item.get('file_urls', [])]
-
-    def file_path(self, request, response=None, info=None):
-        return 'isin_%s.csv' % request.meta.get('isin')
-
-
 class ArivaStocksParquetPipeline(object):
 
     def __init__(self, filepath):
