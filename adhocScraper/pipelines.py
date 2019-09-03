@@ -123,3 +123,27 @@ class ArivaStocksParquetPipeline(object):
             print(item['isin'], e)
 
         return item
+
+
+class ParquetPipeline(object):
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.file = None
+        self.exporter = None
+        self.items = []
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        raise NotImplementedError
+
+    def open_spider(self, spider):
+        self.file = pd.read_parquet(self.filepath)
+
+    def close_spider(self, spider):
+        new_data = pd.DataFrame(self.items)
+        merged_data = pd.concat([self.file, new_data])
+        merged_data.to_parquet(self.filepath)
+
+    def process_item(self, item, spider):
+        self.items.append(item)
+        return item

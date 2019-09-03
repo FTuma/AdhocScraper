@@ -1,4 +1,4 @@
-# Scraping adhoc-announcements for the German stock market (CDAX)
+# Scraping adhoc-announcements for the German stock market
 
 ## Motivation
 For my Masters thesis, which involved the construction of a stock market sentiment index,
