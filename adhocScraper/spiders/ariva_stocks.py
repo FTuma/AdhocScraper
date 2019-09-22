@@ -10,7 +10,7 @@ class ArivaStocksSpider(scrapy.Spider):
     name = 'arivaStocks'
     allowed_domains = ['ariva.de']
     custom_settings = {
-        'DOWNLOAD_DELAY': 1,  # Increase this number if you get blocked (Status code 429) and try again 24h later
+        'DOWNLOAD_DELAY': 3,  # Increase this number if you get blocked (Status code 429) and try again 24h later
         'ITEM_PIPELINES': {'adhocScraper.pipelines.ArivaStocksParquetPipeline': 100,
                            # 'adhocScraper.pipelines.ArivaFilePipeline': 100,
                            'adhocScraper.pipelines.ArivaCompanyMetaDataDuplicatesPipeline': 200,
