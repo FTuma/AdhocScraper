@@ -35,6 +35,7 @@ FILES_EXPIRES = 0
 PATH_ISIN_LIST = DATA_DIR / 'ALL_STOCKS_ISIN.txt'
 
 # Scrapy standard settings
+
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 

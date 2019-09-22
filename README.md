@@ -68,8 +68,8 @@ After getting used to inner workings and all the possible extensions of Scrapy, 
 
 Especially, compared to writing a scraper in R, because it took less time and the resulting scrapers are faster, more robust and easily extensible.
 
-Maybe at some point in the future, I might replace the CSV pipelines with a database pipeline, which would require only a few small adjustments, 
-but for now I'm happy with storing the data locally as CSV files.
+Replacing the CSV and Parquet pipelines with a database pipeline would require only a few small adjustments, 
+but for my current needs it's sufficient to store the data locally as CSV and Parquet files.
 
 
 
