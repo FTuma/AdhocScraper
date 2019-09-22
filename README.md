@@ -37,7 +37,7 @@ To run the full scraping process (announcements, stock prices & metadata), just 
 ### First execution
 When executed the first time, this will download all the English adhoc announcements (as of 2019, ~25K) and store them into a file, adhoc.csv, in the data folder.
 
-After it finished the scraping of all announcements, it automatically starts to download the stock price data for all the companies based on the unique ISINs (as of 2019, ~1K) and write one file for each ISIN into the stocks subfolder of the data directory.
+After it finished the scraping of all announcements, it automatically starts to download the stock price data for all the companies based on the unique ISINs (as of 2019, ~1K) and write one file for each ISIN into the stocks or stocks_xetra subfolder of the data directory.
  
 The corresponding company meta data for each ISIN is written into adhoc_stocks_metadata.csv in the data folder.
 
@@ -60,7 +60,7 @@ timestamp, newsID, headline, text, isin, companyID, company_name, country, url, 
 
 arivaID, country, exchangeID, file_urls, files, foundingyear, industry, isin, listingdate, sector, security_name, stocktype, ticker
 
-**isin_XXXXXXX.csv**: German header & format - delimited by semicolon & decimal comma
+**isin_XXXXXXX.parquet**: German header & format - delimited by semicolon & decimal comma
 
 Datum (date), Eröffnung (open), Höchstkurs (high), Tiefstkurs (low), Schlusskurs (close),Stücke (shares), Volumen (volume) 
 ## Conclusion
