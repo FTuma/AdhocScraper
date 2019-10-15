@@ -56,8 +56,7 @@ This way you can easily execute the scraper every day or week with a cronjob.
 
 **adhoc.csv**: 
 
-timestamp, newsID, headline, text, isin, companyID, company_name, country, url, wkn
-
+|   companyID | company_name   | country     | headline                                          | isin         |   newsID | text                                               | timestamp           | url        | wkn    |\n|-------------|----------------|-------------|---------------------------------------------------|--------------|----------|----------------------------------------------------|---------------------|------------|--------|\n|      372698 | OSRAM Licht AG | Deutschland | OSRAM Licht AG: OSRAM clears way for ams takeover | DE000LED4000 |  1186915 | The Managing Board of Osram Licht AG (Osram) has w | 2019-08-21 20:30:00 | https://dg | LED400 |
 **adhoc_stocks_metadata.csv**: 
 
 arivaID, country, exchangeID, file_urls, files, foundingyear, industry, isin, listingdate, sector, security_name, stocktype, ticker
