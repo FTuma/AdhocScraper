@@ -52,7 +52,7 @@ If there are not yet existing ISINs in the announcements, their company meta dat
 
 This way you can easily execute the scraper every day or week with a cronjob.
 
-## Output
+## Output Examples
 
 **adhoc.csv**: 
 
@@ -60,9 +60,14 @@ This way you can easily execute the scraper every day or week with a cronjob.
 |   companyID | company_name   | country     | headline                                          | isin         |   newsID | text                                               | timestamp           | url        | wkn    |
 |-------------|----------------|-------------|---------------------------------------------------|--------------|----------|----------------------------------------------------|---------------------|------------|--------|
 |      372698 | OSRAM Licht AG | Deutschland | OSRAM Licht AG: OSRAM clears way for ams takeover | DE000LED4000 |  1186915 | The Managing Board of Osram Licht AG (Osram) has ... | 2019-08-21 20:30:00 | https://dg... | LED400 |
+
+
 **adhoc_stocks_metadata.csv**: 
 
-arivaID, country, exchangeID, file_urls, files, foundingyear, industry, isin, listingdate, sector, security_name, stocktype, ticker
+|   arivaID | country     |   exchangeID | file_urls | files |   foundingyear | industry  | isin | listingdate   | sector    | security_name     | stocktype    | ticker   |
+|-----------|-------------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|--------------------------------------|--------------|---------------|-----------|-------------------|--------------|----------|
+| 111942885 | Deutschland |            6 | http://www.ariva.de/quote/historic/historic.csv?secu=111942885&... | [{'url': 'http://www.ariva.de/quote/...|           1919 | Diversifizierte Industrieunternehmen | DE000LED4000 | 08.07.2013    | Industrie | osram_licht-aktie | Inlandsaktie | OSR      |
+
 
 **isin_XXXXXXX.parquet**: German header & format - delimited by semicolon & decimal comma
 
