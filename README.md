@@ -59,19 +59,28 @@ This way you can easily execute the scraper every day or week with a cronjob.
 
 |   companyID | company_name   | country     | headline                                          | isin         |   newsID | text                                               | timestamp           | url        | wkn    |
 |-------------|----------------|-------------|---------------------------------------------------|--------------|----------|----------------------------------------------------|---------------------|------------|--------|
-|      372698 | OSRAM Licht AG | Deutschland | OSRAM Licht AG: OSRAM clears way for ams takeover | DE000LED4000 |  1186915 | The Managing Board of Osram Licht AG (Osram) has ... | 2019-08-21 20:30:00 | https://dg... | LED400 |
+|      372698 | OSRAM Licht AG | Deutschland | OSRAM Licht AG: OSRAM clears way for ams takeover | DE000LED4000 |  1186915 | The Managing Board of Osram Licht AG (Osram) has ... | 2019-08-21 20:30:00 | https://dgap.de/... | LED400 |
 
 
 **adhoc_stocks_metadata.csv**: 
 
 |   arivaID | country     |   exchangeID | file_urls | files |   foundingyear | industry  | isin | listingdate   | sector    | security_name     | stocktype    | ticker   |
 |-----------|-------------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|--------------------------------------|--------------|---------------|-----------|-------------------|--------------|----------|
-| 111942885 | Deutschland |            6 | http://www.ariva.de/quote/historic/historic.csv?secu=111942885&... | [{'url': 'http://www.ariva.de/quote/...|           1919 | Diversifizierte Industrieunternehmen | DE000LED4000 | 08.07.2013    | Industrie | osram_licht-aktie | Inlandsaktie | OSR      |
+| 111942885 | Deutschland |            6 | http://www.ariva.de/quote/historic/historic.csv?secu=111942885&... | [{'url': 'http://www.ariva.de/quote/historic/historic.csv?secu=111942885&boerse_id=6&clean_split=1&clean_payout=1&clean_bezug=1&min_time=2000-01-01&max_time=2019-08-14&trenner=%3B&go=Download', 'path': 'ISIN_DE000LED4000.parquet', 'checksum': 'c450f18613637aa8f6deadaaaeaf68b9'}]|           1919 | Diversifizierte Industrieunternehmen | DE000LED4000 | 08.07.2013    | Industrie | osram_licht-aktie | Inlandsaktie | OSR      |
 
 
-**isin_XXXXXXX.parquet**: German header & format - delimited by semicolon & decimal comma
+**ISIN_XXXXXXX.parquet**: German header & format - delimited by semicolon & decimal comma
 
-Datum (date), Eröffnung (open), Höchstkurs (high), Tiefstkurs (low), Schlusskurs (close),Stücke (shares), Volumen (volume) 
+| Datum,     ISIN (MultiIndex)      |   Erster |   Hoch |   Tief |   Schlusskurs |     Volumen |
+|----------------------------------------------------|----------|--------|--------|---------------|-------------|
+| 2019-08-23, DE000LED4000 |    36.99 |  37.00 |  36.60 |         36.63 | 16109238 |
+
+English translations:
+
+Date, ISIN , Open, High, Low, Close, Volume 
+
+Note: Some files might also include a "Stücke" (Shares) column.
+
 ## Conclusion
 After getting used to inner workings and all the possible extensions of Scrapy, you'll always want to do your web scraping with it. 
 
